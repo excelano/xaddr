@@ -328,29 +328,35 @@ fn parse_name(body: &str, at: usize) -> Result<(String, usize)> {
 
 /// Split on a delimiter that is not inside `[...]`, returning byte spans. `]]` inside a name
 /// stays inside it.
+///
+/// Names do not nest, so this tracks *inside a name or not* rather than a depth. A `[` inside
+/// a name is an ordinary character — a column really can be called `notes [draft]`, and
+/// counting depth would leave that name looking unterminated at the end of the address.
 fn split_top_level(s: &str, delim: char) -> Result<Vec<Range<usize>>> {
     let mut spans = Vec::new();
     let mut start = 0usize;
-    let mut depth = 0i32;
-    let bytes: Vec<(usize, char)> = s.char_indices().collect();
+    let mut in_name = false;
+    let chars: Vec<(usize, char)> = s.char_indices().collect();
     let mut i = 0;
-    while i < bytes.len() {
-        let (at, c) = bytes[i];
-        if c == '[' {
-            depth += 1;
-        } else if c == ']' {
-            if depth > 0 && bytes.get(i + 1).map(|(_, c)| *c) == Some(']') {
-                i += 2;
-                continue;
+    while i < chars.len() {
+        let (at, c) = chars[i];
+        if in_name {
+            if c == ']' {
+                if chars.get(i + 1).map(|(_, c)| *c) == Some(']') {
+                    i += 2;
+                    continue;
+                }
+                in_name = false;
             }
-            depth -= 1;
-        } else if c == delim && depth <= 0 {
+        } else if c == '[' {
+            in_name = true;
+        } else if c == delim {
             spans.push(start..at);
             start = at + c.len_utf8();
         }
         i += 1;
     }
-    if depth > 0 {
+    if in_name {
         return Err(Error::syntax(
             "unterminated [name] — a bracketed column name needs a closing ]",
             0..s.len(),

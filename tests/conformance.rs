@@ -448,3 +448,30 @@ fn a_prefix_resolves_like_any_other_spec() {
         vec![3, 4, 5]
     );
 }
+
+/// A column really can be called `notes [draft]`. Names do not nest, so a `[` inside one is an
+/// ordinary character — treating it as depth leaves the name looking unterminated. xled always
+/// accepted this; xshape never could, which was a seventh divergence between them.
+#[test]
+fn a_literal_open_bracket_inside_a_name_is_just_a_character() {
+    let mut s = sheet();
+    s.header = Some(vec!["notes [draft]".into(), "status".into()]);
+    s.ncols = 2;
+    assert_eq!(
+        parse("[notes [draft]]]")
+            .unwrap()
+            .columns(&s, Bounds::Strict)
+            .unwrap(),
+        vec![0]
+    );
+    // and it still finds the delimiters around it
+    assert_eq!(
+        parse("[notes [draft]]],[status]")
+            .unwrap()
+            .columns(&s, Bounds::Strict)
+            .unwrap(),
+        vec![0, 1]
+    );
+    let (_, n) = xaddr::parse_prefix("[notes [draft]]] del").unwrap();
+    assert_eq!(n, 16);
+}
