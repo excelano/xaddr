@@ -1,0 +1,16 @@
+[package]
+name = "xaddr"
+homepage = "https://excelano.com/xaddr/"
+version = "0.1.0"
+edition = "2021"
+description = "spreadsheet-style addressing for tabular data — column letters, [bracketed names], rows, cells, and ranges"
+license = "MIT"
+authors = ["David M. Anderson"]
+repository = "https://github.com/excelano/xaddr"
+readme = "README.md"
+keywords = ["csv", "tabular", "spreadsheet", "address", "range"]
+categories = ["parser-implementations", "text-processing"]
+
+# No dependencies, deliberately. This crate is linked by CLIs and by a GTK
+# application; it parses and resolves text and must never pull a tree behind it.
+[dependencies]
