@@ -38,6 +38,8 @@ Predicates are deliberately absent. Regular-expression selection, comparisons, a
 
 Parsing takes no table. `parse` reports a syntax error with a byte span into the input, which is what an editor needs to underline the offending character while someone is still typing rather than waiting for them to finish. Resolution is a second call, against anything implementing `Grid`, and reports a lookup error when an address is well-formed but names nothing in this particular table. A caller with two error paths can route them differently; a caller with one can ignore the distinction.
 
+A parser embedding addresses in a larger language has a third need, since an address there has no delimiter — `A:C s/x/y/` is an address followed by a command, and what ends the address is the grammar itself. Slicing it out before parsing would mean re-implementing the thing being delegated, so `parse_prefix` reads one address off the front and reports how many bytes it consumed. Commas are left alone, for a host language that has its own list or union syntax.
+
 `Grid` is four methods, one of them defaulted — how many rows, how many columns, the header if there is one, and optionally a different rule for matching names. A CLI buffer, a GTK list model, and a three-line test fixture can all implement it without reshaping themselves around it.
 
 ## Running off the edge

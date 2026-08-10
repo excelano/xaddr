@@ -78,5 +78,5 @@ mod resolve;
 
 pub use error::{Error, Kind, Result};
 pub use letters::{cell_ref, col_to_letter, letter_to_col, quote_name, rect_ref, MAX_COL};
-pub use parse::{parse, ColRef, Item, Pos, Spec};
+pub use parse::{parse, parse_prefix, ColRef, Item, Pos, Spec};
 pub use resolve::{Bounds, Grid, Rect};

@@ -381,3 +381,70 @@ fn a_quoted_name_round_trips_even_with_a_bracket_in_it() {
         vec![0]
     );
 }
+
+// ------------------------------------------------- embedding an address in a larger language
+
+/// xled's parser reads `A:C s/x/y/` as an address followed by a command. The address has no
+/// delimiter, so what ends it is the grammar — which is exactly what it delegates here.
+#[test]
+fn a_prefix_stops_where_the_address_stops() {
+    for (input, used) in [
+        ("A:C s/x/y/", 3),
+        ("[dept]~/ops/", 6),
+        ("$ d", 1),
+        ("3:$ d", 3),
+        ("A5", 2),
+        (":C rest", 2),
+        ("[first name] p", 12),
+        ("[price]12=0", 9),
+    ] {
+        let (_, n) = xaddr::parse_prefix(input).unwrap_or_else(|e| panic!("{input:?}: {e}"));
+        assert_eq!(n, used, "{input:?}");
+    }
+}
+
+/// A comma is the host language's to interpret — xled unions with it, and consuming it here
+/// would take that decision away.
+#[test]
+fn a_prefix_leaves_the_comma_alone() {
+    let (spec, n) = xaddr::parse_prefix("A,B").unwrap();
+    assert_eq!(n, 1);
+    assert_eq!(spec.items().len(), 1);
+}
+
+#[test]
+fn a_comma_inside_a_name_still_belongs_to_the_name() {
+    let (_, n) = xaddr::parse_prefix("[last, first]:C x").unwrap();
+    assert_eq!(n, 15);
+}
+
+#[test]
+fn a_prefix_that_starts_with_no_address_says_so() {
+    for input in ["/ops/", "~x", "(A:C)", "", "-1"] {
+        let e = xaddr::parse_prefix(input).unwrap_err();
+        assert_eq!(e.kind, Kind::Syntax, "{input:?}");
+        assert!(e.message.contains("expected an address"), "{input:?}: {e}");
+    }
+}
+
+/// `s` is a perfectly good column address, so `s/x/y/` parses as column S followed by junk the
+/// host language owns. Telling a command from an address is the host's job — xled has the
+/// context for it (a reserved word in command position) and this crate does not.
+#[test]
+fn a_bare_letter_is_a_column_even_when_it_looks_like_a_command() {
+    let (spec, n) = xaddr::parse_prefix("s/x/y/").unwrap();
+    assert_eq!(n, 1);
+    assert_eq!(
+        spec.columns(&sheet(), Bounds::Clamp).unwrap(),
+        Vec::<usize>::new()
+    );
+}
+
+#[test]
+fn a_prefix_resolves_like_any_other_spec() {
+    let (spec, _) = xaddr::parse_prefix("[fy2024]:F p").unwrap();
+    assert_eq!(
+        spec.columns(&sheet(), Bounds::Strict).unwrap(),
+        vec![3, 4, 5]
+    );
+}

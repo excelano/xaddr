@@ -87,6 +87,107 @@ pub fn parse(spec: &str) -> Result<Spec> {
     Ok(Spec { items, spans })
 }
 
+/// Parse one address off the front of `s`, returning it and how many bytes it consumed.
+///
+/// For parsers that embed addresses in a larger language, where an address has no delimiter
+/// and simply ends when the next character cannot continue it — `A:C s/x/y/` is an address
+/// followed by a command, and `[dept]~/ops/` is an address followed by an operator. Such a
+/// parser cannot slice the address out before parsing it without knowing the grammar, which is
+/// the thing it is delegating; this hands back the extent instead.
+///
+/// The returned [`Spec`] holds exactly one item, so it resolves like any other. Commas are
+/// *not* consumed: a host language with its own list or union syntax keeps that for itself.
+///
+/// ```
+/// let (spec, used) = xaddr::parse_prefix("A:C s/x/y/").unwrap();
+/// assert_eq!(used, 3);
+/// assert_eq!(&"A:C s/x/y/"[used..], " s/x/y/");
+/// assert_eq!(spec.items().len(), 1);
+/// ```
+pub fn parse_prefix(s: &str) -> Result<(Spec, usize)> {
+    let n = item_extent(s);
+    if n == 0 {
+        return Err(Error::syntax(
+            "expected an address — a cell (C5), column (C or [name]), row (5), or $",
+            0..0,
+        ));
+    }
+    let span = 0..n;
+    let item = parse_item(s, span.clone())?;
+    Ok((
+        Spec {
+            items: vec![item],
+            spans: vec![span],
+        },
+        n,
+    ))
+}
+
+/// How many bytes at the front of `s` belong to one address: an optional leading `:`, a
+/// positional, and at most one `:` with an optional positional after it. Mirrors what the
+/// item parser will accept, so the slice it measures is the slice that parses.
+fn item_extent(s: &str) -> usize {
+    if s.as_bytes().first() == Some(&b':') {
+        return pos_extent(s, 1).unwrap_or(1);
+    }
+    let Some(after_start) = pos_extent(s, 0) else {
+        return 0;
+    };
+    if s.as_bytes().get(after_start) == Some(&b':') {
+        let after_colon = after_start + 1;
+        return pos_extent(s, after_colon).unwrap_or(after_colon);
+    }
+    after_start
+}
+
+/// The end of the positional beginning at `start`, or `None` if none begins there.
+///
+/// Byte indexing is safe throughout: every byte tested is ASCII, and the continuation bytes of
+/// a multi-byte character inside a `[name]` are all `>= 0x80`, so none can be mistaken for a
+/// delimiter. An unterminated `[` runs to the end of the string and is left for the parser to
+/// report, which keeps the "what is an address" answer in one place.
+fn pos_extent(s: &str, start: usize) -> Option<usize> {
+    let b = s.as_bytes();
+    let mut i = start;
+    match *b.get(i)? {
+        b'$' => Some(i + 1),
+        b'[' => {
+            i += 1;
+            while i < b.len() {
+                if b[i] == b']' {
+                    if b.get(i + 1) == Some(&b']') {
+                        i += 2;
+                        continue;
+                    }
+                    i += 1;
+                    break;
+                }
+                i += 1;
+            }
+            while i < b.len() && b[i].is_ascii_digit() {
+                i += 1;
+            }
+            Some(i)
+        }
+        c if c.is_ascii_alphabetic() => {
+            while i < b.len() && b[i].is_ascii_alphabetic() {
+                i += 1;
+            }
+            while i < b.len() && b[i].is_ascii_digit() {
+                i += 1;
+            }
+            Some(i)
+        }
+        c if c.is_ascii_digit() => {
+            while i < b.len() && b[i].is_ascii_digit() {
+                i += 1;
+            }
+            Some(i)
+        }
+        _ => None,
+    }
+}
+
 fn parse_item(spec: &str, span: Range<usize>) -> Result<Item> {
     let parts: Vec<Range<usize>> = split_top_level(&spec[span.clone()], ':')?
         .into_iter()
