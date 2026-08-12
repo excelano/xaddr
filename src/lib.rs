@@ -33,7 +33,7 @@
 //!
 //! # Parsing and resolving are separate steps
 //!
-//! [`parse`] needs no table. It reports a [`Kind::Syntax`] error with a byte [`Error::span`],
+//! [`fn@parse`] needs no table. It reports a [`Kind::Syntax`] error with a byte [`Error::span`],
 //! so an editor can underline the offending character while the user is still typing.
 //! Resolution comes later, against anything implementing [`Grid`], and reports [`Kind::Lookup`]
 //! for an address that is well-formed but names nothing here.

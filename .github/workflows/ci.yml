@@ -12,3 +12,14 @@ on:
 jobs:
   ci:
     uses: excelano/.github/.github/workflows/rust-lib-ci.yml@main
+
+  # The floor declared in Cargo.toml, built and tested rather than asserted.
+  # Three crates link this one and comma is the constrained consumer, so a
+  # feature stabilised last month reaching main is a break somebody else pays
+  # for. Cargo does not warn on a rust-version it has quietly outgrown, which
+  # is why the promise needs a job rather than a comment. Raise the number here
+  # and in Cargo.toml together; they are one statement written twice.
+  msrv:
+    uses: excelano/.github/.github/workflows/rust-lib-ci.yml@main
+    with:
+      toolchain: "1.65"

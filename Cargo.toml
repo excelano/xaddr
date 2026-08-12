@@ -3,6 +3,11 @@ name = "xaddr"
 homepage = "https://excelano.com/xaddr/"
 version = "0.2.1"
 edition = "2021"
+# Measured, not inferred: 1.65 builds and passes the suite, 1.64 fails on the
+# `let ... else` in parse.rs. Edition 2021 would only imply 1.56, which is a
+# floor on the edition rather than on this code. Checked by the msrv job in
+# ci.yml — a declared minimum nothing tests rots the same way a version peg does.
+rust-version = "1.65"
 description = "spreadsheet-style addressing for tabular data — column letters, [bracketed names], rows, cells, and ranges"
 license = "MIT"
 authors = ["David M. Anderson"]

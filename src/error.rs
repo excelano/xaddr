@@ -24,7 +24,7 @@ pub enum Kind {
 pub struct Error {
     pub kind: Kind,
     pub message: String,
-    /// Byte range into the spec passed to [`crate::parse`]. Always a valid slice range of that
+    /// Byte range into the spec passed to [`fn@crate::parse`]. Always a valid slice range of that
     /// input, so `&spec[err.span.clone()]` is safe and `span.start` can place a caret.
     /// Resolution errors, which have no narrower home, span the whole item.
     pub span: Range<usize>,

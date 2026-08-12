@@ -69,7 +69,7 @@ pub fn rect_ref(r1: usize, c1: usize, r2: usize, c2: usize) -> String {
     }
 }
 
-/// A column name, bracketed and escaped so [`crate::parse`] reads back the name given.
+/// A column name, bracketed and escaped so [`fn@crate::parse`] reads back the name given.
 ///
 /// A literal `]` inside a name doubles, the same escape the parser accepts.
 pub fn quote_name(name: &str) -> String {
