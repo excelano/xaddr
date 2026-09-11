@@ -9,9 +9,8 @@ crates.io is the only channel and docs.rs builds itself from it.
 | | |
 |---|---|
 | Loop | crate-only |
-| Version lives in | `version` in `Cargo.toml` |
-| crate | `xaddr` |
-| Consumers | xled, xshape, comma |
+| Version lives in | `Cargo.toml` |
+| crates | `xaddr` |
 
 **Check what a consumer will see before tagging.** `cargo publish --dry-run`
 packages the crate and compiles it from the packaged copy, which catches a file
