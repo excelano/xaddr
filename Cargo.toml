@@ -18,4 +18,6 @@ categories = ["parser-implementations", "text-processing"]
 
 # No dependencies, deliberately. This crate is linked by CLIs and by a GTK
 # application; it parses and resolves text and must never pull a tree behind it.
+# Empty, deliberately: this crate is addressing and nothing else, and a
+# dependency appearing here is a change worth noticing rather than a detail.
 [dependencies]
