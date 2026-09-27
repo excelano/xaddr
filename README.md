@@ -52,4 +52,4 @@ xaddr is the shared floor under the Excelano tabular family — [xled](https://g
 
 ## License
 
-MIT. Authored by David M. Anderson, with AI assistance.
+MIT.
