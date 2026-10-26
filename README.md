@@ -15,7 +15,7 @@ let rect = parse("B2:C5")?.rect(&sheet, Bounds::Clamp)?;
 
 ## Why
 
-Anything that shows a person a table eventually has to let them say which part they mean, and the vocabulary for that was settled by VisiCalc in 1979. The problem is not designing it — it is that every tool implements it again. Three programs in this family had each grown their own copy, agreeing perfectly on `A:C` and disagreeing at every edge: one accepted `[last]:` and one rejected it with an error about a column named `""`, one clamped `A:Z` to the last column and one refused it. Nothing warned anybody, because there was nothing in common to warn from. A dialect that lives in three places is three dialects wearing one name.
+Anything that shows a person a table eventually has to let them say which part they mean, and the vocabulary for that was settled by VisiCalc in 1979. The problem is not designing it — it is that every tool implements it again, and copies agree on `A:C` while disagreeing at every edge, with nothing in common to warn from. A dialect that lives in several places is several dialects wearing one name.
 
 ## The grammar
 
@@ -40,7 +40,7 @@ Parsing takes no table. `parse` reports a syntax error with a byte span into the
 
 A parser embedding addresses in a larger language has a third need, since an address there has no delimiter — `A:C s/x/y/` is an address followed by a command, and what ends the address is the grammar itself. Slicing it out before parsing would mean re-implementing the thing being delegated, so `parse_prefix` reads one address off the front and reports how many bytes it consumed. Commas are left alone, for a host language that has its own list or union syntax.
 
-`Grid` is four methods, one of them defaulted — how many rows, how many columns, the header if there is one, and optionally a different rule for matching names. A CLI buffer, a GTK list model, and a three-line test fixture can all implement it without reshaping themselves around it.
+`Grid` asks for how many rows, how many columns, the header if there is one, and optionally a different rule for matching names. A CLI buffer, a GTK list model, and a three-line test fixture can all implement it without reshaping themselves around it.
 
 ## Running off the edge
 
