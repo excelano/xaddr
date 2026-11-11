@@ -2,13 +2,14 @@
 
 ## Reporting a vulnerability
 
-Please report suspected vulnerabilities privately through GitHub Security Advisories at https://github.com/excelano/xaddr/security/advisories/new. If you would rather not use GitHub, email david.anderson@excelano.com instead. I aim to respond within seven days.
+Please report suspected vulnerabilities privately, using the **Report a vulnerability** button on the Security tab of the repository concerned. If that button is not there, or you would rather not go through GitHub, email david.anderson@excelano.com instead. I aim to respond within seven days.
 
 Please do not open public issues for security problems.
 
+
 ## Supported versions
 
-The latest release receives security fixes. Older versions are not supported.
+The latest release receives security fixes. Older versions are not supported. A fix ships in a new release; update the dependency to take it.
 
 ## What xaddr can access
 
@@ -20,8 +21,8 @@ Nothing. There is no cache, no config, no history, and no telemetry. A parsed ad
 
 ## What a caller should know
 
-The whole attack surface is untrusted input to `parse`, so that is where the guarantees live. Parsing is total: every input either returns a `Spec` or an `Error`, and no input panics, including empty strings, unterminated brackets, absurdly long column letters, invalid UTF-8 boundaries in bracketed names, and numbers too large for `usize`. Column letters past `MAX_COL` are rejected rather than allowed to overflow. There is no recursion in the parser, so no input can exhaust the stack.
+The attack surface is untrusted input to `parse`, so that is where the guarantees live. Parsing is total: every input either returns a `Spec` or an `Error`, and no input panics, including empty strings, unterminated brackets, absurdly long column letters, invalid UTF-8 boundaries in bracketed names, and numbers too large for `usize`. Column letters past `MAX_COL` are rejected rather than allowed to overflow. There is no recursion in the parser, so no input can exhaust the stack.
 
 Resolution is bounded by the table the caller describes. `Bounds::Strict` rejects any address running past the edge, and `Bounds::Clamp` truncates it. Neither can return an index outside the `ncols` and `nrows` the caller reported, so a resolved address is always safe to use as an index into a table of the size that was described. A `Grid` implementation that misreports its own dimensions is the one way to break that, and it is the caller's to get right.
 
-One resource note worth stating plainly: an address like `A:XFD` combined with a large table resolves to a proportionally large result, since `cells` returns one entry per addressed cell. That is a faithful answer to what was asked, not a defect, but a program accepting addresses from an untrusted source should bound the table or check the resolved size before expanding it.
+An address like `A:XFD` combined with a large table resolves to a proportionally large result, since `cells` returns one entry per addressed cell. That is a faithful answer to what was asked, not a defect, but a program accepting addresses from an untrusted source should bound the table or check the resolved size before expanding it.

@@ -13,6 +13,14 @@ let columns = spec.columns(&sheet, Bounds::Strict)?;   // [3, 4, 5, 0]
 let rect = parse("B2:C5")?.rect(&sheet, Bounds::Clamp)?;
 ```
 
+## Install
+
+xaddr is on crates.io. Add it to a Rust project with:
+
+```sh
+cargo add xaddr
+```
+
 ## Why
 
 Anything that shows a person a table eventually has to let them say which part they mean, and the vocabulary for that was settled by VisiCalc in 1979. The problem is not designing it — it is that every tool implements it again, and copies agree on `A:C` while disagreeing at every edge, with nothing in common to warn from. A dialect that lives in several places is several dialects wearing one name.
@@ -48,8 +56,8 @@ Addressing past the end of a table has two defensible answers. Stopping at the e
 
 ## Who uses it
 
-xaddr is the shared floor under the Excelano tabular family — [xled](https://github.com/excelano/xled) edits cell values, [xshape](https://github.com/excelano/xshape) changes a table's geometry, and Comma edits delimited files in a GTK grid. It is a normal crate with no ties to any of them, so anything that shows a table and needs a user to point at part of it can use it the same way.
+xaddr is the shared floor under the Excelano tabular tools, so an address means the same thing in each of them. It is a normal crate with no ties to any of them, and anything that shows a table and needs a user to point at part of it can use it the same way.
 
 ## License
 
-MIT.
+MIT. See [LICENSE](LICENSE).
